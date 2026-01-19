@@ -15,6 +15,13 @@ import {
 // SHARED COMPONENTS
 // ============================================
 
+// Torque Logo icon
+const TorqueLogo = ({ className }) => (
+  <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.5871 2H9.41337C8.48752 2 7.63199 2.49394 7.16906 3.29577L0.58254 14.7041C0.119628 15.5059 0.119621 16.4937 0.582525 17.2955L7.16907 28.7042C7.63199 29.506 8.48752 30 9.4134 30H22.5871C23.513 30 24.3685 29.506 24.8314 28.7042L31.418 17.2955C31.8809 16.4937 31.8809 15.5059 31.4179 14.7041L24.8314 3.29577C24.3685 2.49395 23.513 2 22.5871 2ZM17.6833 16.9716H29.3608L23.5223 27.0847L17.6833 16.9716ZM29.3608 15.0281H18.0574C17.1315 15.0281 16.276 14.5341 15.8131 13.7323L10.1613 3.94352H21.465C22.3909 3.94352 23.2464 4.43746 23.7093 5.23929L29.3608 15.0281ZM14.317 15.0281H2.63966L8.47822 4.91526L14.317 15.0281ZM2.63964 16.9716H13.9429C14.8688 16.9716 15.7243 17.4655 16.1872 18.2673L21.8391 28.0565H10.5355C9.6096 28.0565 8.75407 27.5625 8.29115 26.7607L2.63964 16.9716Z" fill="currentColor"/>
+  </svg>
+);
+
 // Sparkline component
 const Sparkline = ({ data, color = 'violet', trend }) => {
   const max = Math.max(...data);
@@ -165,16 +172,19 @@ const SegmentTag = ({ name, icon }) => {
 // ============================================
 
 // Protocol metric card
-const ProtocolMetricCard = ({ icon: Icon, label, value, subtitle, change, changeLabel, sparklineData, trend, onClick }) => (
-  <button
-    onClick={onClick}
-    className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200 hover:border-violet-300 hover:bg-violet-50/30 transition-all text-left group"
-  >
-    <div className="flex items-center justify-between">
+const ProtocolMetricCard = ({ icon: Icon, label, value, subtitle, change, changeLabel, sparklineData, trend, onAskAI }) => (
+  <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200 transition-all text-left group">
+    <div className="flex items-center justify-between mb-1">
       <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
-      <Icon className="w-4 h-4 text-gray-400 group-hover:text-violet-500 transition-colors" />
+      <button
+        onClick={onAskAI}
+        className="p-1.5 text-violet-500 hover:text-violet-700 hover:bg-violet-100 rounded-lg transition-colors"
+        title="Analyze with AI"
+      >
+        <TorqueLogo className="w-4 h-4" />
+      </button>
     </div>
-    <div className="mt-1 flex items-center justify-between">
+    <div className="flex items-center justify-between">
       <div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-gray-900">{value}</span>
@@ -190,7 +200,7 @@ const ProtocolMetricCard = ({ icon: Icon, label, value, subtitle, change, change
       </div>
       <Sparkline data={sparklineData} trend={trend} />
     </div>
-  </button>
+  </div>
 );
 
 // Metric detail modal
@@ -3719,7 +3729,7 @@ export default function TorqueApp() {
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
+              <TorqueLogo className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg font-bold text-gray-900">TORQUE</span>
           </div>
@@ -3930,7 +3940,7 @@ export default function TorqueApp() {
 
               <div className="grid grid-cols-3 gap-4 mb-4">
                 {metrics.map((metric, i) => (
-                  <ProtocolMetricCard key={i} {...metric} onClick={() => setSelectedMetric(metric)} />
+                  <ProtocolMetricCard key={i} {...metric} onAskAI={() => handleSend(`Analyze my ${metric.label.toLowerCase()} metrics - currently at ${metric.value} (${metric.change} ${metric.changeLabel})`)} />
                 ))}
               </div>
 
@@ -3951,8 +3961,8 @@ export default function TorqueApp() {
                   <div className="text-center w-full max-w-2xl">
                     {/* Personalized Greeting */}
                     <p className="text-sm text-gray-500 mb-2 animate-[fadeSlideUp_0.4s_ease-out]">Good afternoon</p>
-                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-8 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
-                      <span className="text-violet-500 mr-2">✺</span>
+                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-8 tracking-tight animate-[fadeSlideUp_0.5s_ease-out] flex items-center justify-center gap-3">
+                      <TorqueLogo className="w-10 h-10 text-violet-500" />
                       Let's grow your protocol
                     </h1>
 
