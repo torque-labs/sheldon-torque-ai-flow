@@ -3955,21 +3955,10 @@ export default function TorqueApp() {
                   <div className="text-center w-full max-w-2xl">
                     {/* Personalized Greeting */}
                     <p className="text-sm text-gray-500 mb-2 animate-[fadeSlideUp_0.4s_ease-out]">Good afternoon</p>
-                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-6 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
+                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-8 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
                       <span className="text-violet-500 mr-2">✺</span>
-                      What can I help you discover?
+                      Let's grow your protocol
                     </h1>
-
-                    {/* Urgent Insight Teaser */}
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full mb-8 animate-[fadeSlideUp_0.5s_ease-out_0.1s_both]">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                      </span>
-                      <span className="text-sm text-amber-800">3 insights need attention</span>
-                      <span className="text-xs text-amber-600">•</span>
-                      <span className="text-sm text-amber-700 font-medium">12 whales at risk</span>
-                    </div>
 
                     {/* Input Field - Hero element */}
                     <div className="animate-[fadeSlideUp_0.5s_ease-out_0.15s_both]">
@@ -3979,7 +3968,7 @@ export default function TorqueApp() {
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                          placeholder="Ask about your users..."
+                          placeholder="How can we drive growth today?"
                           className="w-full px-5 py-4 bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none"
                         />
                         <div className="flex items-center justify-between px-4 pb-3">
@@ -4001,54 +3990,54 @@ export default function TorqueApp() {
                       </div>
                     </div>
 
-                    {/* Data-driven Recommendations - 2x2 Grid */}
+                    {/* Growth Opportunities - 2x2 Grid */}
                     <div className="grid grid-cols-2 gap-3 mt-6 animate-[fadeSlideUp_0.5s_ease-out_0.25s_both]">
                       <button
-                        onClick={() => handleSend("Show me the 12 at-risk whales")}
-                        className="group flex items-start gap-3 p-4 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
+                        onClick={() => handleSend("How can I retain my 12 top whales?")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                          <AlertTriangle className="w-5 h-5 text-red-600" />
+                        <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-200 transition-colors">
+                          <Shield className="w-5 h-5 text-violet-600" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-800 group-hover:text-red-900">12 whales at risk</div>
-                          <div className="text-xs text-gray-500 group-hover:text-red-700">$890K volume at stake</div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-violet-900">Retain top whales</div>
+                          <div className="text-xs text-gray-500 group-hover:text-violet-700">Protect $890K in volume</div>
                         </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Show me the 234 users who went inactive")}
+                        onClick={() => handleSend("Help me re-engage 234 inactive users")}
                         className="group flex items-start gap-3 p-4 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
                         <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 transition-colors">
-                          <TrendingDown className="w-5 h-5 text-amber-600" />
+                          <Zap className="w-5 h-5 text-amber-600" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-800 group-hover:text-amber-900">234 went inactive</div>
-                          <div className="text-xs text-gray-500 group-hover:text-amber-700">Since last Tuesday</div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-amber-900">Re-engage 234 users</div>
+                          <div className="text-xs text-gray-500 group-hover:text-amber-700">Win back $1.2M volume</div>
                         </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Tell me about the 456 rising stars")}
+                        onClick={() => handleSend("How do I accelerate my 456 rising stars?")}
                         className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
                         <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 transition-colors">
                           <TrendingUp className="w-5 h-5 text-emerald-600" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-800 group-hover:text-emerald-900">456 rising stars</div>
-                          <div className="text-xs text-gray-500 group-hover:text-emerald-700">+127% avg growth</div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-emerald-900">Accelerate rising stars</div>
+                          <div className="text-xs text-gray-500 group-hover:text-emerald-700">456 users growing 127%</div>
                         </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Create a segment of mid-tier traders ready to convert")}
-                        className="group flex items-start gap-3 p-4 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
+                        onClick={() => handleSend("Launch a campaign to convert mid-tier traders")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-200 transition-colors">
-                          <Layers className="w-5 h-5 text-violet-600" />
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+                          <Rocket className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-800 group-hover:text-violet-900">Create segment</div>
-                          <div className="text-xs text-gray-500 group-hover:text-violet-700">892 ready to convert</div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-blue-900">Launch campaign</div>
+                          <div className="text-xs text-gray-500 group-hover:text-blue-700">892 ready to convert</div>
                         </div>
                       </button>
                     </div>
