@@ -2311,13 +2311,19 @@ const Message = ({
 );
 
 // Quick prompt button
-const QuickPrompt = ({ text, onClick }) => (
+const QuickPrompt = ({ text, onClick, icon: Icon, delay = 0 }) => (
   <button
     onClick={onClick}
-    className="w-full text-left px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 transition-all flex items-center gap-3"
+    style={{ animationDelay: `${delay}ms` }}
+    className="group relative w-full text-left p-4 bg-white/70 backdrop-blur-sm border border-gray-200/60 rounded-2xl text-sm text-gray-600 hover:bg-white hover:border-violet-300/60 hover:shadow-lg hover:shadow-violet-100/50 hover:-translate-y-0.5 transition-all duration-300 ease-out animate-[fadeSlideUp_0.5s_ease-out_both]"
   >
-    <MessageSquare className="w-4 h-4 text-gray-400" />
-    {text}
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-violet-50 group-hover:to-violet-100 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
+        <Icon className="w-4 h-4 text-gray-400 group-hover:text-violet-500 transition-colors duration-300" />
+      </div>
+      <span className="pt-1 leading-relaxed group-hover:text-gray-800 transition-colors">{text}</span>
+    </div>
+    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-500/0 via-violet-500/0 to-violet-500/0 group-hover:from-violet-500/5 group-hover:via-transparent group-hover:to-violet-500/5 transition-all duration-500" />
   </button>
 );
 
@@ -2919,6 +2925,94 @@ const SegmentBuilderModal = ({ onClose, onSave }) => {
 };
 
 // ============================================
+// ALL CONVERSATIONS PANEL
+// ============================================
+
+const AllConversationsPanel = ({ conversations, searchQuery, onSearchChange, onClose, onSelectConversation }) => {
+  const filteredConversations = conversations.filter(c =>
+    c.query.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.result.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/20 z-40"
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 z-50 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <History className="w-5 h-5 text-violet-600" />
+            <h2 className="text-lg font-semibold text-gray-900">All Conversations</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="px-6 py-4 border-b border-gray-100">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search conversations..."
+              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Conversations List */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          {filteredConversations.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <p className="text-sm">No conversations found</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredConversations.map((c, i) => (
+                <div
+                  key={i}
+                  onClick={() => {
+                    onSelectConversation(c);
+                    onClose();
+                  }}
+                  className="px-4 py-3 rounded-xl cursor-pointer hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all"
+                >
+                  <p className="text-sm font-medium text-gray-800 line-clamp-2">{c.query}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-violet-600 font-medium">→ {c.result}</span>
+                    <span className="text-xs text-gray-400">{c.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <p className="text-xs text-gray-500 text-center">
+            {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ============================================
 // MAIN APP
 // ============================================
 
@@ -2944,6 +3038,8 @@ export default function TorqueApp() {
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [selectedSegmentDetail, setSelectedSegmentDetail] = useState(null);
+  const [showAllConversations, setShowAllConversations] = useState(false);
+  const [conversationSearchQuery, setConversationSearchQuery] = useState('');
 
   // CRM view state
   const [selectedUsers, setSelectedUsers] = useState(new Set());
@@ -3681,6 +3777,12 @@ export default function TorqueApp() {
               <div>
                 <div className="flex items-center justify-between py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <div className="flex items-center gap-2"><History className="w-3.5 h-3.5" /><span>Recent</span></div>
+                  <button
+                    onClick={() => setShowAllConversations(true)}
+                    className="text-xs font-medium text-violet-600 hover:text-violet-700 cursor-pointer normal-case"
+                  >
+                    View All
+                  </button>
                 </div>
                 <div className="mt-2 space-y-1">
                   {conversations.map((c, i) => (
@@ -3836,53 +3938,6 @@ export default function TorqueApp() {
                 ))}
               </div>
 
-              {/* Opportunities Section */}
-              <div className="mt-2">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Opportunities</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => handleSend("Tell me about the at-risk whales opportunity")}
-                    className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <AlertTriangle className="w-4 h-4 text-red-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-red-900">12 at-risk whales</div>
-                      <div className="text-xs text-red-700">$890K weekly volume at risk</div>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-red-400 group-hover:text-red-600 flex-shrink-0" />
-                  </button>
-
-                  <button
-                    onClick={() => handleSend("Tell me about the rising stars opportunity")}
-                    className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-colors text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-emerald-900">456 rising stars</div>
-                      <div className="text-xs text-emerald-700">+127% avg growth this month</div>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 flex-shrink-0" />
-                  </button>
-
-                  <button
-                    onClick={() => handleSend("Tell me about the inactive users opportunity")}
-                    className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <UserX className="w-4 h-4 text-amber-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-amber-900">234 went inactive</div>
-                      <div className="text-xs text-amber-700">$1.2M volume last week</div>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-amber-400 group-hover:text-amber-600 flex-shrink-0" />
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Chat Area or Segment Detail View */}
@@ -3894,79 +3949,146 @@ export default function TorqueApp() {
               />
             ) : (
             <div className="flex-1 flex flex-col bg-gray-50">
-              <div className="flex-1 overflow-y-auto px-6 py-8">
-                <div className="max-w-3xl mx-auto">
-                  {messages.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-200">
-                        <Sparkles className="w-10 h-10 text-white" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">What can I help you with?</h2>
-                      <p className="text-gray-500 mb-8 max-w-md mx-auto">I can analyze your users, find patterns, create segments, and launch campaigns.</p>
-                      <div className="max-w-lg mx-auto space-y-3">
-                        {quickPrompts.map((prompt, i) => (
-                          <QuickPrompt key={i} text={prompt} onClick={() => handleSend(prompt)} />
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="flex justify-center">
-                        <button onClick={resetHome} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-full shadow-sm transition-all">
-                          <RefreshCw className="w-4 h-4" />
-                          New Conversation
-                        </button>
-                      </div>
-                      {messages.map((msg, i) => (
-                        <Message
-                          key={i}
-                          {...msg}
-                          onSaveSegment={() => setShowSegmentModal(true)}
-                          onCreateCampaign={handleCampaignApproval}
-                          onShowAll={handleShowAllUsers}
-                          onExport={handleExport}
-                          onShare={handleShare}
-                          onInvestigate={handleInvestigate}
-                          onViewSegmentDetail={(segmentData) => setSelectedSegmentDetail(segmentData)}
+              {messages.length === 0 ? (
+                // Centered layout when no messages - minimal style
+                <div className="flex-1 flex items-center justify-center px-6">
+                  <div className="text-center w-full max-w-xl">
+                    {/* Greeting */}
+                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-12 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
+                      <span className="text-violet-500 mr-2">✺</span>
+                      What can I help you discover?
+                    </h1>
+
+                    {/* Input Field - Hero element */}
+                    <div className="animate-[fadeSlideUp_0.5s_ease-out_0.1s_both]">
+                      <div className="relative bg-white rounded-2xl border border-gray-200 shadow-lg shadow-gray-200/50">
+                        <input
+                          type="text"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                          placeholder="Ask about your users..."
+                          className="w-full px-5 py-4 bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none"
                         />
-                      ))}
-                      {isTyping && (
-                        <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-between px-4 pb-3">
+                          <div className="flex items-center gap-2">
+                            <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Plus className="w-5 h-5" />
+                            </button>
+                            <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                              <Clock className="w-5 h-5" />
+                            </button>
                           </div>
-                          <div className="px-5 py-4 bg-white border border-gray-200 rounded-2xl rounded-bl-md shadow-sm">
-                            <div className="flex gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" />
-                              <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{animationDelay: '0.2s'}} />
-                              <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{animationDelay: '0.4s'}} />
-                            </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-400">Torque AI</span>
+                            <button
+                              onClick={() => handleSend()}
+                              disabled={!inputValue.trim()}
+                              className="p-2 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+                            >
+                              <ArrowUpRight className="w-4 h-4 text-white" />
+                            </button>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              <div className="bg-white border-t border-gray-200 px-6 py-5">
-                <div className="max-w-3xl mx-auto">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                      placeholder="Ask me anything about your users..."
-                      className="w-full px-5 py-4 pr-14 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
-                    />
-                    <button onClick={() => handleSend()} className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-violet-600 hover:bg-violet-700 rounded-xl transition-colors">
-                      <Send className="w-5 h-5 text-white" />
-                    </button>
+                    {/* Quick Action Chips - Specific recommendations */}
+                    <div className="flex items-center justify-center gap-2 mt-6 flex-wrap animate-[fadeSlideUp_0.5s_ease-out_0.2s_both]">
+                      <button
+                        onClick={() => handleSend("Who are my most valuable users at risk?")}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                      >
+                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                        Who are my most valuable users at risk?
+                      </button>
+                      <button
+                        onClick={() => handleSend("Show me users who traded last week but not this week")}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                      >
+                        <TrendingDown className="w-4 h-4 text-amber-500" />
+                        Users who traded last week but not this week
+                      </button>
+                      <button
+                        onClick={() => handleSend("Create a segment of rising mid-tier traders")}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                      >
+                        <Layers className="w-4 h-4 text-violet-500" />
+                        Create a segment of rising traders
+                      </button>
+                      <button
+                        onClick={() => handleSend("Why is retention dropping this week?")}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                      >
+                        <BarChart2 className="w-4 h-4 text-emerald-500" />
+                        Why is retention dropping?
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 text-center mt-3">Press Enter to send • AI can create segments and launch campaigns with your approval</p>
                 </div>
-              </div>
+              ) : (
+                // Messages layout with bottom input
+                <>
+                  <div className="flex-1 overflow-y-auto px-6 py-8">
+                    <div className="max-w-3xl mx-auto">
+                      <div className="space-y-6">
+                        <div className="flex justify-center">
+                          <button onClick={resetHome} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-full shadow-sm transition-all">
+                            <RefreshCw className="w-4 h-4" />
+                            New Conversation
+                          </button>
+                        </div>
+                        {messages.map((msg, i) => (
+                          <Message
+                            key={i}
+                            {...msg}
+                            onSaveSegment={() => setShowSegmentModal(true)}
+                            onCreateCampaign={handleCampaignApproval}
+                            onShowAll={handleShowAllUsers}
+                            onExport={handleExport}
+                            onShare={handleShare}
+                            onInvestigate={handleInvestigate}
+                            onViewSegmentDetail={(segmentData) => setSelectedSegmentDetail(segmentData)}
+                          />
+                        ))}
+                        {isTyping && (
+                          <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                              <Sparkles className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="px-5 py-4 bg-white border border-gray-200 rounded-2xl rounded-bl-md shadow-sm">
+                              <div className="flex gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" />
+                                <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{animationDelay: '0.2s'}} />
+                                <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{animationDelay: '0.4s'}} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-t border-gray-200 px-6 py-5">
+                    <div className="max-w-3xl mx-auto">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                          placeholder="Ask me anything about your users..."
+                          className="w-full px-5 py-4 pr-14 bg-gray-50 border border-gray-200 rounded-2xl text-[15px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
+                        />
+                        <button onClick={() => handleSend()} className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-violet-600 hover:bg-violet-700 rounded-xl transition-colors">
+                          <Send className="w-5 h-5 text-white" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 text-center mt-3">Press Enter to send • AI can create segments and launch campaigns with your approval</p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             )}
 
@@ -3979,6 +4101,18 @@ export default function TorqueApp() {
             {showExportModal && <ExportReportModal onClose={() => setShowExportModal(false)} onExport={handleExportAction} />}
             {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} onShare={handleShareAction} />}
             {showInvestigateModal && <InvestigateMoreModal onClose={() => setShowInvestigateModal(false)} onInvestigate={handleInvestigateAction} />}
+            {showAllConversations && (
+              <AllConversationsPanel
+                conversations={conversations}
+                searchQuery={conversationSearchQuery}
+                onSearchChange={setConversationSearchQuery}
+                onClose={() => {
+                  setShowAllConversations(false);
+                  setConversationSearchQuery('');
+                }}
+                onSelectConversation={(c) => handleSend(c.query)}
+              />
+            )}
           </>
         ) : (
           <>
@@ -4032,16 +4166,6 @@ export default function TorqueApp() {
                   ]} />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setShowSegmentBuilder(true)} className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg text-sm font-medium text-white transition-colors">
-                    <Plus className="w-4 h-4" />
-                    New Segment
-                  </button>
-                  <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    <Download className="w-4 h-4" />
-                    Export
-                  </button>
-                </div>
               </div>
             </div>
 
