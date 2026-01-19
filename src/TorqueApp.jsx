@@ -3914,10 +3914,6 @@ export default function TorqueApp() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input type="text" placeholder="Search wallet..." className="w-52 pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500" />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg text-sm font-medium text-white transition-colors">
-                  <Sparkles className="w-4 h-4" />
-                  Torque AI
-                </button>
                 <button className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
                   <Wallet className="w-4 h-4 text-gray-500" />
                   <span className="text-sm font-mono text-gray-600">torrS...i8XZz</span>
