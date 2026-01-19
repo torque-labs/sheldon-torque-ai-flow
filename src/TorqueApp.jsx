@@ -3950,17 +3950,29 @@ export default function TorqueApp() {
             ) : (
             <div className="flex-1 flex flex-col bg-gray-50">
               {messages.length === 0 ? (
-                // Centered layout when no messages - minimal style
+                // Centered layout when no messages - enhanced with data-driven insights
                 <div className="flex-1 flex items-center justify-center px-6">
-                  <div className="text-center w-full max-w-xl">
-                    {/* Greeting */}
-                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-12 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
+                  <div className="text-center w-full max-w-2xl">
+                    {/* Personalized Greeting */}
+                    <p className="text-sm text-gray-500 mb-2 animate-[fadeSlideUp_0.4s_ease-out]">Good afternoon</p>
+                    <h1 className="text-[2.5rem] font-light text-gray-800 mb-6 tracking-tight animate-[fadeSlideUp_0.5s_ease-out]">
                       <span className="text-violet-500 mr-2">✺</span>
                       What can I help you discover?
                     </h1>
 
+                    {/* Urgent Insight Teaser */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full mb-8 animate-[fadeSlideUp_0.5s_ease-out_0.1s_both]">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                      </span>
+                      <span className="text-sm text-amber-800">3 insights need attention</span>
+                      <span className="text-xs text-amber-600">•</span>
+                      <span className="text-sm text-amber-700 font-medium">12 whales at risk</span>
+                    </div>
+
                     {/* Input Field - Hero element */}
-                    <div className="animate-[fadeSlideUp_0.5s_ease-out_0.1s_both]">
+                    <div className="animate-[fadeSlideUp_0.5s_ease-out_0.15s_both]">
                       <div className="relative bg-white rounded-2xl border border-gray-200 shadow-lg shadow-gray-200/50">
                         <input
                           type="text"
@@ -3971,13 +3983,9 @@ export default function TorqueApp() {
                           className="w-full px-5 py-4 bg-transparent text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none"
                         />
                         <div className="flex items-center justify-between px-4 pb-3">
-                          <div className="flex items-center gap-2">
-                            <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Plus className="w-5 h-5" />
-                            </button>
-                            <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Clock className="w-5 h-5" />
-                            </button>
+                          <div className="flex items-center gap-1 text-xs text-gray-400">
+                            <span className="px-2 py-1 bg-gray-100 rounded text-[10px] font-medium">Enter</span>
+                            <span>to send</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-sm text-gray-400">Torque AI</span>
@@ -3993,35 +4001,55 @@ export default function TorqueApp() {
                       </div>
                     </div>
 
-                    {/* Quick Action Chips - Specific recommendations */}
-                    <div className="flex items-center justify-center gap-2 mt-6 flex-wrap animate-[fadeSlideUp_0.5s_ease-out_0.2s_both]">
+                    {/* Data-driven Recommendations - 2x2 Grid */}
+                    <div className="grid grid-cols-2 gap-3 mt-6 animate-[fadeSlideUp_0.5s_ease-out_0.25s_both]">
                       <button
-                        onClick={() => handleSend("Who are my most valuable users at risk?")}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                        onClick={() => handleSend("Show me the 12 at-risk whales")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <AlertTriangle className="w-4 h-4 text-red-500" />
-                        Who are my most valuable users at risk?
+                        <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:bg-red-200 transition-colors">
+                          <AlertTriangle className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-red-900">12 whales at risk</div>
+                          <div className="text-xs text-gray-500 group-hover:text-red-700">$890K volume at stake</div>
+                        </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Show me users who traded last week but not this week")}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                        onClick={() => handleSend("Show me the 234 users who went inactive")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <TrendingDown className="w-4 h-4 text-amber-500" />
-                        Users who traded last week but not this week
+                        <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 transition-colors">
+                          <TrendingDown className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-amber-900">234 went inactive</div>
+                          <div className="text-xs text-gray-500 group-hover:text-amber-700">Since last Tuesday</div>
+                        </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Create a segment of rising mid-tier traders")}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                        onClick={() => handleSend("Tell me about the 456 rising stars")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <Layers className="w-4 h-4 text-violet-500" />
-                        Create a segment of rising traders
+                        <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 transition-colors">
+                          <TrendingUp className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-emerald-900">456 rising stars</div>
+                          <div className="text-xs text-gray-500 group-hover:text-emerald-700">+127% avg growth</div>
+                        </div>
                       </button>
                       <button
-                        onClick={() => handleSend("Why is retention dropping this week?")}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-300 rounded-full text-sm text-gray-600 hover:text-violet-700 transition-colors shadow-sm"
+                        onClick={() => handleSend("Create a segment of mid-tier traders ready to convert")}
+                        className="group flex items-start gap-3 p-4 bg-white hover:bg-violet-50 border border-gray-200 hover:border-violet-200 rounded-xl text-left transition-all shadow-sm hover:shadow-md"
                       >
-                        <BarChart2 className="w-4 h-4 text-emerald-500" />
-                        Why is retention dropping?
+                        <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-200 transition-colors">
+                          <Layers className="w-5 h-5 text-violet-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-800 group-hover:text-violet-900">Create segment</div>
+                          <div className="text-xs text-gray-500 group-hover:text-violet-700">892 ready to convert</div>
+                        </div>
                       </button>
                     </div>
                   </div>
