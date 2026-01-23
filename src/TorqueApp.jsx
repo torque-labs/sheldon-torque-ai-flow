@@ -598,10 +598,11 @@ const RecipeIcon = ({ type, className = "w-6 h-6" }) => {
 
 // Create Incentive Modal - Recipe-based with Segment Selection
 const CreateIncentiveModal = ({ onClose, onCreate }) => {
-  // Flow state: 'recipes' | 'configure'
+  // Flow state: 'recipes' | 'configure' | 'success'
   const [flowStep, setFlowStep] = useState('recipes');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [activeCategory, setActiveCategory] = useState('trading');
+  const [launchedIncentive, setLaunchedIncentive] = useState(null);
 
   // Configuration wizard step: 1=Configure, 2=Audience, 3=Review
   const [configStep, setConfigStep] = useState(1);
@@ -800,8 +801,8 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
     if (configStep < 2) {
       setConfigStep(configStep + 1);
     } else {
-      // Submit
-      onCreate({
+      // Show success screen
+      const incentive = {
         recipe: selectedRecipe,
         name: incentiveName,
         description,
@@ -810,7 +811,13 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
         frequency,
         audience: selectedAudienceData,
         eligibilityMode,
-      });
+      };
+      setLaunchedIncentive(incentive);
+      setFlowStep('success');
+      // Auto-redirect after 2 seconds
+      setTimeout(() => {
+        onCreate(incentive);
+      }, 2000);
     }
   };
 
@@ -820,6 +827,24 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
   };
 
   // Render recipe selection
+  // Render success screen
+  if (flowStep === 'success') {
+    return (
+      <div className="fixed inset-0 bg-gray-50 z-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+            <Check className="w-10 h-10 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Incentive Launched!</h1>
+          <p className="text-gray-500 mb-2">
+            "{launchedIncentive?.name}" has been successfully created.
+          </p>
+          <p className="text-sm text-gray-400">Redirecting to home...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (flowStep === 'recipes') {
     return (
       <div className="fixed inset-0 bg-gray-50 z-50 overflow-auto">
@@ -904,6 +929,8 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
                 setFlowStep('build-your-own');
                 setIncentiveName('');
                 setSelectedRewardType(null);
+                setAudienceType('all');
+                setSelectedAudience(null);
               }}
               className="text-gray-900 font-medium ml-1 underline hover:text-violet-600 transition-colors"
             >
@@ -986,7 +1013,8 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
       if (byoStep < 4) {
         setByoStep(byoStep + 1);
       } else {
-        onCreate({
+        // Show success screen
+        const incentive = {
           type: 'custom',
           rewardType: selectedRewardType,
           name: incentiveName,
@@ -1005,7 +1033,13 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
           rewardToken,
           totalRewardPool,
           rankAllocations,
-        });
+        };
+        setLaunchedIncentive(incentive);
+        setFlowStep('success');
+        // Auto-redirect after 2 seconds
+        setTimeout(() => {
+          onCreate(incentive);
+        }, 2000);
       }
     };
 
@@ -1360,37 +1394,6 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
                             <span className="text-sm font-semibold text-violet-600">{formatNumber(selectedEligibilityData.walletCount)}</span>
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Snapshot Mode</label>
-                            <div className="grid grid-cols-2 gap-2">
-                              <button
-                                onClick={() => setEligibilityMode('pinned')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  eligibilityMode === 'pinned'
-                                    ? 'bg-violet-100 text-violet-700 border-2 border-violet-500'
-                                    : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                                }`}
-                              >
-                                <div className="text-left">
-                                  <div>Pinned</div>
-                                  <div className="text-xs font-normal opacity-70">Snapshot at launch</div>
-                                </div>
-                              </button>
-                              <button
-                                onClick={() => setEligibilityMode('recurring')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  eligibilityMode === 'recurring'
-                                    ? 'bg-violet-100 text-violet-700 border-2 border-violet-500'
-                                    : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                                }`}
-                              >
-                                <div className="text-left">
-                                  <div>Recurring</div>
-                                  <div className="text-xs font-normal opacity-70">Updates each period</div>
-                                </div>
-                              </button>
-                            </div>
-                          </div>
                         </>
                       )}
                     </div>
@@ -2221,36 +2224,6 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
                       </div>
                     )}
 
-                    {/* Snapshot Mode */}
-                    {selectedAudienceData && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Snapshot Mode</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => setEligibilityMode('pinned')}
-                            className={`p-3 rounded-lg border text-left text-sm ${
-                              eligibilityMode === 'pinned'
-                                ? 'border-violet-500 bg-violet-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <span className={`font-medium ${eligibilityMode === 'pinned' ? 'text-violet-700' : 'text-gray-700'}`}>Pinned</span>
-                            <p className="text-xs text-gray-500 mt-0.5">Snapshot at launch</p>
-                          </button>
-                          <button
-                            onClick={() => setEligibilityMode('recurring')}
-                            className={`p-3 rounded-lg border text-left text-sm ${
-                              eligibilityMode === 'recurring'
-                                ? 'border-violet-500 bg-violet-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <span className={`font-medium ${eligibilityMode === 'recurring' ? 'text-violet-700' : 'text-gray-700'}`}>Recurring</span>
-                            <p className="text-xs text-gray-500 mt-0.5">Updates each period</p>
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -2324,10 +2297,6 @@ const CreateIncentiveModal = ({ onClose, onCreate }) => {
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Eligible Wallets</span>
                       <span className="text-sm font-medium text-violet-600">{formatNumber(selectedAudienceData.userCount)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-500">Snapshot Mode</span>
-                      <span className="text-sm font-medium text-gray-900 capitalize">{eligibilityMode}</span>
                     </div>
                   </div>
                 ) : (
@@ -6095,21 +6064,7 @@ export default function TorqueApp() {
           onCreate={(incentive) => {
             console.log('Created incentive:', incentive);
             setShowIncentiveModal(false);
-            // Show confirmation in chat
-            setMessages(prev => [...prev, {
-              role: 'assistant',
-              content: `Created "${incentive.name}" incentive targeting ${incentive.segment.icon} ${incentive.segment.name} (${incentive.segment.userCount.toLocaleString()} eligible users). The incentive is set to ${incentive.snapshotMode} mode and will run for ${incentive.duration} days.`,
-              data: {
-                type: 'incentive_created',
-                title: incentive.name,
-                urgency: 'Created',
-                stats: [
-                  { value: incentive.segment.userCount.toLocaleString(), label: 'Eligible Users', color: 'text-violet-600' },
-                  { value: incentive.rewardAmount, label: 'Reward' },
-                  { value: `${incentive.duration}d`, label: 'Duration' }
-                ]
-              }
-            }]);
+            setCurrentView('home');
           }}
         />
       )}
