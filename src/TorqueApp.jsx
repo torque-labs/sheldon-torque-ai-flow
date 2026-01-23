@@ -8,7 +8,7 @@ import {
   Layers, Play, Pause, ChevronUp, X, RefreshCw,
   Filter, Download, Check, ChevronLeft, Copy,
   Minus, MoreHorizontal, Eye, Share2, Bell, FileText,
-  Mail, Link, Lightbulb, Edit3, BarChart, UserX, Rocket
+  Mail, Link, Lightbulb, Edit3, BarChart, UserX, Rocket, Trophy, Upload
 } from 'lucide-react';
 
 // ============================================
@@ -534,6 +534,1831 @@ const CreateCampaignModal = ({ onClose, onCreate }) => {
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// Recipe Icon Components
+const RecipeIcon = ({ type, className = "w-6 h-6" }) => {
+  const icons = {
+    'accumulation': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M2 20h20M5 20V10l7-7 7 7v10M9 20v-6h6v6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'lottery': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round"/>
+        <path d="M3 9h18M9 3v18" strokeLinecap="round"/>
+      </svg>
+    ),
+    'volume': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'streak': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'early-bird': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'leaderboard': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M8 21V11M16 21V7M12 21V3" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'holder': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v12M6 12h12" strokeLinecap="round"/>
+      </svg>
+    ),
+    'lp': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2a10 10 0 1 0 10 10" strokeLinecap="round"/>
+        <path d="M12 12l7-7M16 5h3v3" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    'referral': (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round"/>
+      </svg>
+    ),
+  };
+  return icons[type] || icons['volume'];
+};
+
+// Create Incentive Modal - Recipe-based with Segment Selection
+const CreateIncentiveModal = ({ onClose, onCreate }) => {
+  // Flow state: 'recipes' | 'configure'
+  const [flowStep, setFlowStep] = useState('recipes');
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('trading');
+
+  // Configuration wizard step: 1=Configure, 2=Audience, 3=Review
+  const [configStep, setConfigStep] = useState(1);
+
+  // Configuration state
+  const [incentiveName, setIncentiveName] = useState('');
+  const [description, setDescription] = useState('');
+  const [launchType, setLaunchType] = useState('recurring');
+  const [duration, setDuration] = useState('14');
+  const [frequency, setFrequency] = useState('weekly');
+
+  // Audience state
+  const [selectedAudience, setSelectedAudience] = useState(null);
+  const [showAudienceDropdown, setShowAudienceDropdown] = useState(false);
+  const [audienceType, setAudienceType] = useState('all'); // 'all' or 'segment'
+  const [selectedEligibility, setSelectedEligibility] = useState(null);
+  const [showEligibilityDropdown, setShowEligibilityDropdown] = useState(false);
+  const [eligibilityMode, setEligibilityMode] = useState('pinned');
+
+  // Build Your Own state
+  const [selectedRewardType, setSelectedRewardType] = useState(null);
+  const [byoStep, setByoStep] = useState(1); // 1=Config, 2=Audience, 3=Distribution, 4=Confirm
+
+  // BYO Configuration state
+  const [campaign, setCampaign] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [distributionMethod, setDistributionMethod] = useState('claim');
+  const [claimWindowStart, setClaimWindowStart] = useState('15:00');
+  const [claimWindowDuration, setClaimWindowDuration] = useState('24');
+  const [timezoneOffset, setTimezoneOffset] = useState('-5');
+
+  // BYO Audience state
+  const [selectedQuery, setSelectedQuery] = useState(null);
+  const [addressColumn, setAddressColumn] = useState('');
+  const [metricColumn, setMetricColumn] = useState('');
+
+  // BYO Distribution state
+  const [rewardToken, setRewardToken] = useState('USDC');
+  const [totalRewardPool, setTotalRewardPool] = useState('10000');
+  const [distributionPreset, setDistributionPreset] = useState('base');
+  const [distributionConfigMethod, setDistributionConfigMethod] = useState('manual');
+  const [valueType, setValueType] = useState('percentage');
+  const [orderingMode, setOrderingMode] = useState('tier');
+  const [rankAllocations, setRankAllocations] = useState([
+    { from: 1, to: 1, value: 20.08 },
+    { from: 2, to: 2, value: 12 },
+    { from: 3, to: 3, value: 8.5 },
+    { from: 4, to: 4, value: 6.5 },
+    { from: 5, to: 5, value: 5 },
+    { from: 6, to: 6, value: 4 },
+    { from: 7, to: 7, value: 3.2 },
+    { from: 8, to: 8, value: 2.6 },
+    { from: 9, to: 9, value: 2.1 },
+    { from: 10, to: 10, value: 1.8 },
+  ]);
+
+  // Recipe categories
+  const categories = [
+    { id: 'trading', label: 'TRADING' },
+    { id: 'holding', label: 'HOLDING' },
+    { id: 'liquidity', label: 'LIQUIDITY' },
+    { id: 'referrals', label: 'REFERRALS' },
+  ];
+
+  // Recipe data
+  const recipes = [
+    // Trading
+    { id: 'accumulation', name: 'Accumulation Bonus', description: 'Bonus rewards for net positive token accumulation.', category: 'trading', reward: 'Rebate', icon: 'accumulation', tags: ['Trading Activity', 'Encourages Holding'] },
+    { id: 'lottery', name: 'Random Buy Multiplier Lottery', description: 'Buyers get lottery tickets based on purchase amount.', category: 'trading', reward: 'Raffle', icon: 'lottery', tags: ['Randomized Rewards', 'Trading Activity'] },
+    { id: 'volume-warrior', name: 'Volume Warrior', description: 'Rewards traders based on volume + consistency.', category: 'trading', reward: 'Rebate', icon: 'volume', tags: ['Trading Activity', 'Volume', 'Daily Engagement'] },
+    { id: 'lucky-streak', name: 'Lucky Streak', description: 'Exponential rewards for consecutive daily buys.', category: 'trading', reward: 'Rebate', icon: 'streak', tags: ['Trading Activity', 'Encourages Buying', 'Streak'] },
+    { id: 'early-bird', name: 'Early Bird', description: 'Reward early adopters with higher multipliers based on when they make their first purchase.', category: 'trading', reward: 'Rebate', icon: 'early-bird', tags: ['Trading Activity', 'Encourages Buying', 'Proportional'] },
+    { id: 'high-volume', name: 'High Volume Trader Rewards', description: 'Competitive rewards for top traders by volume.', category: 'trading', reward: 'Leaderboard', icon: 'leaderboard', tags: ['Trading Activity', 'Volume', 'Proportional'] },
+    // Holding
+    { id: 'diamond-hands', name: 'Diamond Hands', description: 'Reward users who hold tokens for extended periods.', category: 'holding', reward: 'Rebate', icon: 'holder', tags: ['Holding', 'Time-based'] },
+    { id: 'holder-tiers', name: 'Holder Tiers', description: 'Tiered rewards based on token balance thresholds.', category: 'holding', reward: 'Rebate', icon: 'holder', tags: ['Holding', 'Balance-based'] },
+    // Liquidity
+    { id: 'lp-rewards', name: 'LP Provider Rewards', description: 'Incentivize liquidity provision with bonus rewards.', category: 'liquidity', reward: 'Rebate', icon: 'lp', tags: ['Liquidity', 'LP Providers'] },
+    { id: 'lp-loyalty', name: 'LP Loyalty Program', description: 'Long-term rewards for consistent LP providers.', category: 'liquidity', reward: 'Leaderboard', icon: 'lp', tags: ['Liquidity', 'Time-based'] },
+    // Referrals
+    { id: 'referral-bonus', name: 'Referral Bonus', description: 'Reward users for bringing new traders to the platform.', category: 'referrals', reward: 'Rebate', icon: 'referral', tags: ['Referrals', 'New Users'] },
+    { id: 'referral-tiers', name: 'Referral Leaderboard', description: 'Competitive rewards for top referrers.', category: 'referrals', reward: 'Leaderboard', icon: 'referral', tags: ['Referrals', 'Competitive'] },
+  ];
+
+  // Reward types for Build Your Own
+  const rewardTypes = [
+    { id: 'leaderboard', name: 'Leaderboard', description: 'Reward token holders based on holding duration and amount with linear or tiered bonus structures' },
+    { id: 'rebate', name: 'Rebate', description: 'Percentage based rewards on your metric' },
+    { id: 'raffle', name: 'Raffle', description: 'Randomly reward users' },
+    { id: 'direct', name: 'Direct', description: 'Quickly distribute tokens to an existing audience list' },
+  ];
+
+  // Available tokens for rewards
+  const rewardTokens = [
+    { id: 'usdc', name: 'USDC', icon: '💵' },
+    { id: 'usdt', name: 'USDT', icon: '💴' },
+    { id: 'sol', name: 'SOL', icon: '◎' },
+  ];
+
+  // Eligibility segments - defines WHO can qualify for rewards
+  const eligibilitySegments = [
+    {
+      id: 'verified-traders',
+      name: 'Verified Traders',
+      description: 'Users who have completed trading verification',
+      walletCount: 1247,
+    },
+    {
+      id: 'token-holders',
+      name: 'TORQ Token Holders',
+      description: 'Users holding at least 100 TORQ tokens',
+      walletCount: 2340,
+    },
+    {
+      id: 'loyalty-members',
+      name: 'Loyalty Program Members',
+      description: 'Users enrolled in the loyalty program',
+      walletCount: 892,
+    },
+  ];
+
+  // Audience queries - defines the DATA SOURCE for calculating reward distribution
+  const audienceQueries = [
+    {
+      id: 'trading-volume',
+      name: 'Trading Volume (30d)',
+      description: 'Rank users by their 30-day trading volume',
+      addressColumn: 'wallet',
+      metricColumn: 'volume_30d',
+      userCount: 4521,
+      preview: [
+        { address: 'CyaETVxvBrahnPWkqm5VsdCryS2QmNht2UFhLJHga54o', metric: 125000 },
+        { address: '6pkPgzDBLeNbalDB6DYAQzFHtvCMkLVscyyl4E5NcyY', metric: 98500 },
+        { address: 'CA4kekXL5GJWBcsWIvjtMFBghQ8pFsGRWFxLHCtrzu5', metric: 87200 },
+      ]
+    },
+    {
+      id: 'pnl-performance',
+      name: 'PnL Performance',
+      description: 'Rank users by their profit and loss',
+      addressColumn: 'feePayer',
+      metricColumn: 'total_pnl',
+      userCount: 3892,
+      preview: [
+        { address: '7f3a8b2c...4d9e', metric: 40415.85 },
+        { address: '9a2c1b4e...8f3d', metric: 17514.67 },
+        { address: '3b7f9d1a...2c8e', metric: 13006.37 },
+      ]
+    },
+    {
+      id: 'activity-score',
+      name: 'Activity Score',
+      description: 'Rank users by engagement and activity metrics',
+      addressColumn: 'wallet',
+      metricColumn: 'activity_score',
+      userCount: 5678,
+      preview: [
+        { address: '4c1a7e3d...9b2f', metric: 9850 },
+        { address: '6b8f2a9c...1d7e', metric: 8720 },
+        { address: '8e5d1c7b...3a9f', metric: 7640 },
+      ]
+    },
+  ];
+
+  const filteredRecipes = recipes.filter(r => r.category === activeCategory);
+  const selectedAudienceData = audienceQueries.find(a => a.id === selectedAudience);
+  const selectedEligibilityData = eligibilitySegments.find(s => s.id === selectedEligibility);
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
+    return num.toLocaleString();
+  };
+
+  const handleSelectRecipe = (recipe) => {
+    setSelectedRecipe(recipe);
+    setIncentiveName(recipe.name);
+    setFlowStep('configure');
+    setConfigStep(1);
+  };
+
+  const handleBack = () => {
+    if (flowStep === 'configure') {
+      if (configStep > 1) {
+        setConfigStep(configStep - 1);
+      } else {
+        setFlowStep('recipes');
+        setSelectedRecipe(null);
+        setConfigStep(1);
+      }
+    }
+  };
+
+  const handleContinue = () => {
+    if (configStep < 2) {
+      setConfigStep(configStep + 1);
+    } else {
+      // Submit
+      onCreate({
+        recipe: selectedRecipe,
+        name: incentiveName,
+        description,
+        launchType,
+        duration,
+        frequency,
+        audience: selectedAudienceData,
+        eligibilityMode,
+      });
+    }
+  };
+
+  const canContinue = () => {
+    if (configStep === 1) return incentiveName.trim().length > 0;
+    return true;
+  };
+
+  // Render recipe selection
+  if (flowStep === 'recipes') {
+    return (
+      <div className="fixed inset-0 bg-gray-50 z-50 overflow-auto">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
+                <Gift className="w-4 h-4 text-violet-600" />
+              </div>
+              <span className="text-lg font-semibold text-gray-900">Create Incentive</span>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold text-gray-900 italic mb-2">Launch Your Campaign</h1>
+            <p className="text-gray-500">Choose a pre-configured recipe or build your own.</p>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex border-b border-gray-200">
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-8 py-3 text-sm font-medium transition-colors relative ${
+                    activeCategory === cat.id
+                      ? 'text-gray-900'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  {cat.label}
+                  {activeCategory === cat.id && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recipe Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+            {filteredRecipes.map(recipe => (
+              <button
+                key={recipe.id}
+                onClick={() => handleSelectRecipe(recipe)}
+                className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:border-violet-300 hover:shadow-md transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center mb-4 group-hover:bg-violet-100 transition-colors">
+                  <RecipeIcon type={recipe.icon} className="w-6 h-6 text-violet-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">{recipe.name}</h3>
+                <p className="text-sm text-gray-500 mb-3 line-clamp-2">{recipe.description}</p>
+                <div className="mb-3">
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">REWARD</span>
+                  <p className="text-sm font-medium text-gray-900">{recipe.reward}</p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {recipe.tags.map(tag => (
+                    <span key={tag} className="px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-600">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Build from scratch */}
+          <div className="text-center">
+            <span className="text-gray-400">+</span>
+            <span className="text-gray-500 ml-2">Want full control?</span>
+            <button
+              onClick={() => {
+                setFlowStep('build-your-own');
+                setIncentiveName('');
+                setSelectedRewardType(null);
+              }}
+              className="text-gray-900 font-medium ml-1 underline hover:text-violet-600 transition-colors"
+            >
+              Build from scratch
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render Build Your Own - Select Reward Type page
+  if (flowStep === 'build-your-own' && !selectedRewardType) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 z-50 overflow-auto">
+        {/* Back link */}
+        <div className="max-w-4xl mx-auto px-6 py-6">
+          <button
+            onClick={() => setFlowStep('recipes')}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back to Create Incentive
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          <div className="text-center mb-10">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Select Reward Type</h1>
+            <p className="text-gray-500">Choose how you want to distribute rewards to your audience</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {rewardTypes.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => {
+                  setSelectedRewardType(type);
+                  setByoStep(1);
+                }}
+                className="bg-white p-6 rounded-xl border border-gray-200 text-left hover:border-violet-300 hover:shadow-sm transition-all"
+              >
+                <div className="w-10 h-10 rounded-lg bg-violet-50 flex items-center justify-center mb-4">
+                  {type.id === 'leaderboard' && <Trophy className="w-5 h-5 text-violet-500" />}
+                  {type.id === 'rebate' && <span className="text-violet-500 font-bold">%</span>}
+                  {type.id === 'raffle' && <Gift className="w-5 h-5 text-violet-500" />}
+                  {type.id === 'direct' && <Zap className="w-5 h-5 text-violet-500" />}
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">{type.name}</h3>
+                <p className="text-sm text-gray-500">{type.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render Build Your Own - Configuration wizard
+  if (flowStep === 'build-your-own' && selectedRewardType) {
+    const buildSteps = [
+      { num: 1, label: 'Configuration' },
+      { num: 2, label: 'Audience' },
+      { num: 3, label: 'Distribution Rules' },
+      { num: 4, label: 'Confirmation' },
+    ];
+
+    const selectedQueryData = audienceQueries.find(q => q.id === selectedQuery);
+
+    const handleByoBack = () => {
+      if (byoStep === 1) {
+        setSelectedRewardType(null);
+      } else {
+        setByoStep(byoStep - 1);
+      }
+    };
+
+    const handleByoContinue = () => {
+      if (byoStep < 4) {
+        setByoStep(byoStep + 1);
+      } else {
+        onCreate({
+          type: 'custom',
+          rewardType: selectedRewardType,
+          name: incentiveName,
+          description,
+          launchType,
+          startDate,
+          endDate,
+          frequency,
+          distributionMethod,
+          claimWindowStart,
+          claimWindowDuration,
+          timezoneOffset,
+          audience: selectedQueryData,
+          addressColumn,
+          metricColumn,
+          rewardToken,
+          totalRewardPool,
+          rankAllocations,
+        });
+      }
+    };
+
+    const canByoContinue = () => {
+      if (byoStep === 1) return incentiveName.trim().length > 0;
+      if (byoStep === 2) return selectedQuery && addressColumn && metricColumn;
+      if (byoStep === 3) return totalRewardPool && rankAllocations.length > 0;
+      return true;
+    };
+
+    const addRankAllocation = () => {
+      const lastAlloc = rankAllocations[rankAllocations.length - 1];
+      const nextFrom = lastAlloc ? lastAlloc.to + 1 : 1;
+      setRankAllocations([...rankAllocations, { from: nextFrom, to: nextFrom, value: 0.5 }]);
+    };
+
+    const updateRankAllocation = (index, field, value) => {
+      const updated = [...rankAllocations];
+      updated[index] = { ...updated[index], [field]: field === 'value' ? parseFloat(value) || 0 : parseInt(value) || 0 };
+      setRankAllocations(updated);
+    };
+
+    const removeRankAllocation = (index) => {
+      setRankAllocations(rankAllocations.filter((_, i) => i !== index));
+    };
+
+    return (
+      <div className="fixed inset-0 bg-gray-100 z-50 overflow-auto">
+        {/* Header with stepper */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            {/* Stepper */}
+            <div className="flex items-center justify-between">
+              {buildSteps.map((step, idx) => (
+                <div key={step.num} className="flex items-center flex-1">
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+                    byoStep === step.num
+                      ? 'bg-violet-100 border border-violet-300'
+                      : byoStep > step.num
+                        ? 'text-green-600'
+                        : 'text-gray-400'
+                  }`}>
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium ${
+                      byoStep === step.num
+                        ? 'bg-violet-600 text-white'
+                        : byoStep > step.num
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-300 text-white'
+                    }`}>
+                      {byoStep > step.num ? <Check className="w-3 h-3" /> : step.num}
+                    </span>
+                    <span className={`text-sm font-medium ${
+                      byoStep === step.num ? 'text-violet-700' : byoStep > step.num ? 'text-green-600' : 'text-gray-400'
+                    }`}>
+                      {step.label}
+                    </span>
+                    {byoStep > step.num && (
+                      <button
+                        onClick={() => setByoStep(step.num)}
+                        className="text-xs text-violet-600 hover:underline ml-1"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                  {idx < buildSteps.length - 1 && (
+                    <div className={`flex-1 h-0.5 mx-2 ${byoStep > step.num ? 'bg-green-500' : 'bg-gray-200'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          {/* Step 1: Configuration */}
+          {byoStep === 1 && (
+            <div>
+              <div className="mb-6 border-b border-dashed border-gray-300 pb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Setup reward type and timing</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Basic Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Incentive Name <span className="text-violet-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={incentiveName}
+                        onChange={(e) => setIncentiveName(e.target.value)}
+                        placeholder="A descriptive name for your incentive"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Brief description of what this incentive is about"
+                        rows={3}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Incentive Image</label>
+                      <p className="text-xs text-gray-500 mb-2">Upload an image to for your incentive</p>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-violet-400 transition-colors cursor-pointer">
+                        <div className="text-gray-400 mb-2">
+                          <Download className="w-6 h-6 mx-auto" />
+                        </div>
+                        <p className="text-sm text-gray-600">Drag and drop or <span className="text-violet-600">browse</span> for a file to upload.</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG or JPEG files up to 10MB</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Campaign</label>
+                      <input
+                        type="text"
+                        value={campaign}
+                        onChange={(e) => setCampaign(e.target.value)}
+                        placeholder="Enter campaign"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Launch Configuration */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Launch Configuration</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Launch Type <span className="text-violet-500">*</span>
+                      </label>
+                      <select
+                        value={launchType}
+                        onChange={(e) => setLaunchType(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="recurring">Recurring</option>
+                        <option value="one-time">One-time</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Launch Date Range</label>
+                      <div className="flex items-center gap-2 px-4 py-2.5 bg-violet-50 border border-violet-200 rounded-lg">
+                        <Clock className="w-4 h-4 text-violet-500" />
+                        <span className="text-sm text-violet-700">01/22/2026 12:17 PM to 02/05/2026 12:17 PM</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">This incentive will run for 14 days, starting Jan 22, 2026, 12:17 PM and ending Feb 05, 2026, 12:17 PM</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Frequency <span className="text-violet-500">*</span>
+                      </label>
+                      <select
+                        value={frequency}
+                        onChange={(e) => setFrequency(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Distribution Settings */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Distribution Settings</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Distribution Method <span className="text-violet-500">*</span>
+                      </label>
+                      <select
+                        value={distributionMethod}
+                        onChange={(e) => setDistributionMethod(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="claim">Claim</option>
+                        <option value="airdrop">Airdrop</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Claim Window Start Time <span className="text-violet-500">*</span>
+                      </label>
+                      <input
+                        type="time"
+                        value={claimWindowStart}
+                        onChange={(e) => setClaimWindowStart(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Claim Window Duration (hours) <span className="text-violet-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={claimWindowDuration}
+                        onChange={(e) => setClaimWindowDuration(e.target.value)}
+                        placeholder="24"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      />
+                    </div>
+                    <div className="pt-2">
+                      <p className="text-sm font-medium text-gray-700">Snapshot Timing</p>
+                      <p className="text-xs text-gray-500">Snapshot will be taken automatically at campaign end period</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timezone Settings */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Timezone Settings</h3>
+                  <p className="text-sm text-gray-500 mb-4">Configure the timezone for your incentives. This will be used to determine the timezone for the claim window and data collection snapshots.</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Timezone Offset (hours from UTC) <span className="text-violet-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={timezoneOffset}
+                      onChange={(e) => setTimezoneOffset(e.target.value)}
+                      placeholder="-5"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Audience */}
+          {byoStep === 2 && (
+            <div>
+              <div className="mb-6 border-b border-dashed border-gray-300 pb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Define eligibility and audience</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Eligibility Restriction (Optional) - NOW FIRST */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-medium text-gray-900">Eligibility Restriction</h3>
+                      <p className="text-sm text-gray-500">Define who can qualify for rewards</p>
+                    </div>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Optional</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => {
+                        setAudienceType('all');
+                        setSelectedEligibility(null);
+                      }}
+                      className={`relative flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                        audienceType === 'all'
+                          ? 'border-violet-500 bg-violet-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        audienceType === 'all' ? 'border-violet-500' : 'border-gray-300'
+                      }`}>
+                        {audienceType === 'all' && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                      </div>
+                      <div>
+                        <span className={`font-medium ${audienceType === 'all' ? 'text-violet-900' : 'text-gray-900'}`}>
+                          Open to All
+                        </span>
+                        <p className="text-xs text-gray-500 mt-0.5">Anyone can qualify for this incentive</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setAudienceType('segment')}
+                      className={`relative flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                        audienceType === 'segment'
+                          ? 'border-violet-500 bg-violet-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        audienceType === 'segment' ? 'border-violet-500' : 'border-gray-300'
+                      }`}>
+                        {audienceType === 'segment' && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                      </div>
+                      <div>
+                        <span className={`font-medium ${audienceType === 'segment' ? 'text-violet-900' : 'text-gray-900'}`}>
+                          Restrict to Segment
+                        </span>
+                        <p className="text-xs text-gray-500 mt-0.5">Only specific wallets can qualify</p>
+                      </div>
+                    </button>
+                  </div>
+
+                  {audienceType === 'segment' && (
+                    <div className="mt-4 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Select Segment</label>
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowEligibilityDropdown(!showEligibilityDropdown)}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
+                          >
+                            <span className={selectedEligibility ? 'text-gray-900' : 'text-gray-400'}>
+                              {selectedEligibilityData ? `${selectedEligibilityData.name} (${formatNumber(selectedEligibilityData.walletCount)} wallets)` : 'Select a segment...'}
+                            </span>
+                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                          </button>
+
+                          {showEligibilityDropdown && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-auto">
+                              {eligibilitySegments.map((segment) => (
+                                <button
+                                  key={segment.id}
+                                  onClick={() => {
+                                    setSelectedEligibility(segment.id);
+                                    setShowEligibilityDropdown(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-gray-50"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-900">{segment.name}</span>
+                                    <span className="text-xs text-gray-500">{formatNumber(segment.walletCount)} wallets</span>
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-0.5">{segment.description}</p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {selectedEligibilityData && (
+                        <>
+                          <div className="flex items-center justify-between p-3 bg-violet-50 rounded-lg">
+                            <span className="text-sm text-gray-600">Eligible wallets</span>
+                            <span className="text-sm font-semibold text-violet-600">{formatNumber(selectedEligibilityData.walletCount)}</span>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Snapshot Mode</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                onClick={() => setEligibilityMode('pinned')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  eligibilityMode === 'pinned'
+                                    ? 'bg-violet-100 text-violet-700 border-2 border-violet-500'
+                                    : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
+                                }`}
+                              >
+                                <div className="text-left">
+                                  <div>Pinned</div>
+                                  <div className="text-xs font-normal opacity-70">Snapshot at launch</div>
+                                </div>
+                              </button>
+                              <button
+                                onClick={() => setEligibilityMode('recurring')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  eligibilityMode === 'recurring'
+                                    ? 'bg-violet-100 text-violet-700 border-2 border-violet-500'
+                                    : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
+                                }`}
+                              >
+                                <div className="text-left">
+                                  <div>Recurring</div>
+                                  <div className="text-xs font-normal opacity-70">Updates each period</div>
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Select Target Audience - NOW SECOND */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Select Audience Query</h3>
+                  <p className="text-sm text-gray-500 mb-4">Choose the data source for calculating reward distribution</p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Audience Query <span className="text-violet-500">*</span>
+                      </label>
+                      <p className="text-xs text-gray-500 mb-2">Select a predefined query that determines how rewards are calculated</p>
+                      <select
+                        value={selectedQuery || ''}
+                        onChange={(e) => {
+                          setSelectedQuery(e.target.value);
+                          const query = audienceQueries.find(q => q.id === e.target.value);
+                          if (query) {
+                            setAddressColumn(query.addressColumn);
+                            setMetricColumn(query.metricColumn);
+                          }
+                        }}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="">Select a query...</option>
+                        {audienceQueries.map((query) => (
+                          <option key={query.id} value={query.id}>{query.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedQueryData && (
+                      <>
+                        {/* Preview Data */}
+                        <div className="mt-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-medium text-violet-600">{selectedQueryData.name}</h4>
+                            <div className="flex gap-2">
+                              <span className="text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded">1 possible address columns</span>
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">1 possible metric columns</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Preview Data
+                          </div>
+
+                          <div className="bg-gray-50 rounded-lg overflow-hidden">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b border-gray-200">
+                                  <th className="text-left py-2 px-4 font-medium text-gray-600">
+                                    {selectedQueryData.addressColumn}
+                                    <span className="ml-2 text-xs bg-violet-500 text-white px-1.5 py-0.5 rounded">addr</span>
+                                  </th>
+                                  <th className="text-right py-2 px-4 font-medium text-gray-600">
+                                    {selectedQueryData.metricColumn}
+                                    <span className="ml-2 text-xs bg-gray-400 text-white px-1.5 py-0.5 rounded">metric</span>
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {selectedQueryData.preview.map((row, idx) => (
+                                  <tr key={idx} className="border-b border-gray-200 last:border-0">
+                                    <td className="py-2 px-4 font-mono text-xs text-gray-600">{row.address}</td>
+                                    <td className="py-2 px-4 text-right text-gray-900">{row.metric.toLocaleString()}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Select Columns */}
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                          <h4 className="font-medium text-violet-600 mb-4">Column Mapping</h4>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Address Column <span className="text-violet-500">*</span>
+                              </label>
+                              <select
+                                value={addressColumn}
+                                onChange={(e) => setAddressColumn(e.target.value)}
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                              >
+                                <option value={selectedQueryData.addressColumn}>{selectedQueryData.addressColumn}</option>
+                              </select>
+                              <p className="text-xs text-gray-500 mt-1">This column will be used for the user's address</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Metric Column <span className="text-violet-500">*</span>
+                              </label>
+                              <select
+                                value={metricColumn}
+                                onChange={(e) => setMetricColumn(e.target.value)}
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                              >
+                                <option value={selectedQueryData.metricColumn}>{selectedQueryData.metricColumn}</option>
+                              </select>
+                              <p className="text-xs text-gray-500 mt-1">This column will be used to calculate reward distribution</p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Distribution Rules */}
+          {byoStep === 3 && (
+            <div>
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">Distribution Rules</h2>
+                <p className="text-sm text-gray-500">Configure how rewards will be distributed</p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Reward Pool Configuration */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Reward Pool Configuration</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reward Token <span className="text-violet-500">*</span>
+                      </label>
+                      <select
+                        value={rewardToken}
+                        onChange={(e) => setRewardToken(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="USDC">USDC</option>
+                        <option value="SOL">SOL</option>
+                        <option value="USDT">USDT</option>
+                        <option value="BONK">BONK</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Total Reward Pool <span className="text-violet-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={totalRewardPool}
+                        onChange={(e) => setTotalRewardPool(e.target.value)}
+                        placeholder="10,000"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Distribution Configuration */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div className="mb-4">
+                    <h3 className="font-medium text-gray-900">Distribution Configuration</h3>
+                    <p className="text-sm text-gray-500 mt-1">Quick Presets</p>
+                  </div>
+
+                  {/* Preset Card */}
+                  <button
+                    onClick={() => setDistributionPreset('base')}
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                      distributionPreset === 'base'
+                        ? 'border-violet-500 bg-violet-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        distributionPreset === 'base' ? 'border-violet-500' : 'border-gray-300'
+                      }`}>
+                        {distributionPreset === 'base' && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                      </div>
+                      <div>
+                        <span className={`font-medium ${distributionPreset === 'base' ? 'text-violet-900' : 'text-gray-900'}`}>
+                          Base
+                        </span>
+                        <p className="text-xs text-gray-500 mt-0.5">Simple tiered distribution with gradually decreasing rewards</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Distribution Method */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Distribution Method</h3>
+
+                  {/* Method Tabs */}
+                  <div className="flex border-b border-gray-200 mb-4">
+                    {['formula', 'manual', 'csv'].map((method) => (
+                      <button
+                        key={method}
+                        onClick={() => setDistributionConfigMethod(method)}
+                        className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                          distributionConfigMethod === method
+                            ? 'border-violet-500 text-violet-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {method.charAt(0).toUpperCase() + method.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Manual Configuration */}
+                  {distributionConfigMethod === 'manual' && (
+                    <div className="space-y-4">
+                      {/* Value Type / Ordering Mode Toggles */}
+                      <div className="flex gap-4">
+                        <div className="flex bg-gray-100 rounded-lg p-1">
+                          <button
+                            onClick={() => setValueType('percentage')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                              valueType === 'percentage'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            By Percentage
+                          </button>
+                          <button
+                            onClick={() => setValueType('fixed')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                              valueType === 'fixed'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            Fixed Amount
+                          </button>
+                        </div>
+                        <div className="flex bg-gray-100 rounded-lg p-1">
+                          <button
+                            onClick={() => setOrderingMode('tier')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                              orderingMode === 'tier'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            Per Tier
+                          </button>
+                          <button
+                            onClick={() => setOrderingMode('rank')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                              orderingMode === 'rank'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            Per Rank
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Rank Allocations Table */}
+                      <div className="border border-gray-200 rounded-lg overflow-hidden">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank From</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank To</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {valueType === 'percentage' ? 'Percentage' : 'Amount'}
+                              </th>
+                              <th className="px-4 py-3 w-12"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {rankAllocations.map((allocation, idx) => (
+                              <tr key={idx}>
+                                <td className="px-4 py-3">
+                                  <input
+                                    type="number"
+                                    value={allocation.from}
+                                    onChange={(e) => {
+                                      const newAllocations = [...rankAllocations];
+                                      newAllocations[idx].from = parseInt(e.target.value) || 0;
+                                      setRankAllocations(newAllocations);
+                                    }}
+                                    className="w-20 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                  />
+                                </td>
+                                <td className="px-4 py-3">
+                                  <input
+                                    type="number"
+                                    value={allocation.to}
+                                    onChange={(e) => {
+                                      const newAllocations = [...rankAllocations];
+                                      newAllocations[idx].to = parseInt(e.target.value) || 0;
+                                      setRankAllocations(newAllocations);
+                                    }}
+                                    className="w-20 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                  />
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      value={allocation.value}
+                                      onChange={(e) => {
+                                        const newAllocations = [...rankAllocations];
+                                        newAllocations[idx].value = parseFloat(e.target.value) || 0;
+                                        setRankAllocations(newAllocations);
+                                      }}
+                                      className="w-24 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    />
+                                    {valueType === 'percentage' && <span className="text-gray-500 text-sm">%</span>}
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <button
+                                    onClick={() => {
+                                      const newAllocations = rankAllocations.filter((_, i) => i !== idx);
+                                      setRankAllocations(newAllocations);
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Add Tier Button */}
+                      <button
+                        onClick={() => {
+                          const lastAllocation = rankAllocations[rankAllocations.length - 1];
+                          const newFrom = lastAllocation ? lastAllocation.to + 1 : 1;
+                          setRankAllocations([
+                            ...rankAllocations,
+                            { from: newFrom, to: newFrom + 9, value: 5 }
+                          ]);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-violet-600 hover:text-violet-700 font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Tier
+                      </button>
+
+                      {/* Total Allocated */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Total Allocated</span>
+                        <span className={`text-sm font-semibold ${
+                          rankAllocations.reduce((sum, a) => sum + a.value, 0) === 100
+                            ? 'text-green-600'
+                            : 'text-amber-600'
+                        }`}>
+                          {rankAllocations.reduce((sum, a) => sum + a.value, 0).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Formula Configuration */}
+                  {distributionConfigMethod === 'formula' && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-500">Formula-based distribution allows you to define a mathematical formula for reward allocation.</p>
+                      <textarea
+                        placeholder="e.g., reward = base_amount * (1 / rank)"
+                        rows={3}
+                        className="w-full mt-3 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none font-mono"
+                      />
+                    </div>
+                  )}
+
+                  {/* CSV Configuration */}
+                  {distributionConfigMethod === 'csv' && (
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">Upload a CSV file with rank allocations</p>
+                      <button className="mt-3 px-4 py-2 text-sm text-violet-600 hover:text-violet-700 font-medium border border-violet-200 rounded-lg hover:bg-violet-50">
+                        Choose File
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Confirmation */}
+          {byoStep === 4 && (
+            <div>
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">Confirmation</h2>
+                <p className="text-sm text-gray-500">Review your incentive configuration before launching</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Incentive Info */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
+                      {selectedRewardType?.id === 'rebate' && <TrendingUp className="w-6 h-6 text-violet-600" />}
+                      {selectedRewardType?.id === 'raffle' && <Gift className="w-6 h-6 text-violet-600" />}
+                      {selectedRewardType?.id === 'leaderboard' && <Trophy className="w-6 h-6 text-violet-600" />}
+                      {selectedRewardType?.id === 'direct' && <Zap className="w-6 h-6 text-violet-600" />}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{incentiveName || 'Untitled Incentive'}</h3>
+                      <p className="text-sm text-gray-500">{description || 'Custom incentive'}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                    <div>
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">Type</span>
+                      <p className="text-sm font-medium text-gray-900">Custom Build</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">Reward Type</span>
+                      <p className="text-sm font-medium text-gray-900">{selectedRewardType?.name}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configuration Summary */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Configuration</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Launch Type</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{launchType}</span>
+                    </div>
+                    {startDate && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Start Date</span>
+                        <span className="text-sm font-medium text-gray-900">{startDate}</span>
+                      </div>
+                    )}
+                    {endDate && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">End Date</span>
+                        <span className="text-sm font-medium text-gray-900">{endDate}</span>
+                      </div>
+                    )}
+                    {launchType === 'recurring' && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Frequency</span>
+                        <span className="text-sm font-medium text-gray-900 capitalize">{frequency}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Distribution Method</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{distributionMethod}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Audience Summary */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Audience</h3>
+                  {selectedQueryData ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Target Audience</span>
+                        <span className="text-sm font-medium text-gray-900">{selectedQueryData.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Eligible Wallets</span>
+                        <span className="text-sm font-medium text-violet-600">{formatNumber(selectedQueryData.userCount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Address Column</span>
+                        <span className="text-sm font-medium text-gray-900">{addressColumn}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-500">Metric Column</span>
+                        <span className="text-sm font-medium text-gray-900">{metricColumn}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Users className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">No audience selected</p>
+                        <p className="text-xs text-gray-500">Go back to select a target audience</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Distribution Summary */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Distribution Rules</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Reward Token</span>
+                      <span className="text-sm font-medium text-gray-900">{rewardToken}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Total Reward Pool</span>
+                      <span className="text-sm font-medium text-gray-900">{totalRewardPool} {rewardToken}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Distribution Method</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{distributionConfigMethod}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Tiers Configured</span>
+                      <span className="text-sm font-medium text-gray-900">{rankAllocations.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Total Allocated</span>
+                      <span className={`text-sm font-medium ${
+                        rankAllocations.reduce((sum, a) => sum + a.value, 0) === 100
+                          ? 'text-green-600'
+                          : 'text-amber-600'
+                      }`}>
+                        {rankAllocations.reduce((sum, a) => sum + a.value, 0).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 sticky bottom-0">
+          <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <span className="text-xs text-gray-400">* Required Fields</span>
+            <button
+              onClick={handleByoContinue}
+              disabled={!canByoContinue()}
+              className="px-6 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {byoStep === 4 ? 'Launch Incentive' : 'Continue'}
+            </button>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Render configuration wizard
+  return (
+    <div className="fixed inset-0 bg-gray-50 z-50 overflow-auto">
+      {/* Header with stepper */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* Stepper */}
+          <div className="flex items-center justify-center gap-4">
+            {[
+              { num: 1, label: 'Configure' },
+              { num: 2, label: 'Review' },
+            ].map((step, idx) => (
+              <div key={step.num} className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                    configStep >= step.num
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {configStep > step.num ? <Check className="w-3 h-3" /> : step.num}
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    configStep >= step.num ? 'text-gray-900' : 'text-gray-400'
+                  }`}>
+                    {step.label}
+                  </span>
+                </div>
+                {idx < 1 && (
+                  <div className={`w-24 h-px mx-4 ${
+                    configStep > step.num ? 'bg-violet-600' : 'bg-gray-200'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-2xl mx-auto px-6 py-8">
+        {/* Step 1: Configuration */}
+        {configStep === 1 && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Setup reward type and timing</h2>
+              <p className="text-sm text-gray-500">Configure your {selectedRecipe?.name} incentive</p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="font-medium text-gray-900 mb-4">Basic Information</h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Incentive Name <span className="text-violet-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={incentiveName}
+                      onChange={(e) => setIncentiveName(e.target.value)}
+                      placeholder="A descriptive name for your incentive"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Brief description of what this incentive is about"
+                      rows={3}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Launch Configuration */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="font-medium text-gray-900 mb-4">Launch Configuration</h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Launch Type <span className="text-violet-500">*</span>
+                    </label>
+                    <select
+                      value={launchType}
+                      onChange={(e) => setLaunchType(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    >
+                      <option value="recurring">Recurring</option>
+                      <option value="one-time">One-time</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                    <select
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    >
+                      <option value="7">7 days</option>
+                      <option value="14">14 days</option>
+                      <option value="30">30 days</option>
+                      <option value="90">90 days</option>
+                    </select>
+                  </div>
+
+                  {launchType === 'recurring' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Frequency <span className="text-violet-500">*</span>
+                      </label>
+                      <select
+                        value={frequency}
+                        onChange={(e) => setFrequency(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Eligibility */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Eligibility</h3>
+                    <p className="text-sm text-gray-500">Who can participate in this incentive?</p>
+                  </div>
+                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">Optional</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* All Users Option */}
+                  <button
+                    onClick={() => {
+                      setAudienceType('all');
+                      setSelectedAudience(null);
+                    }}
+                    className={`relative flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                      audienceType === 'all'
+                        ? 'border-violet-500 bg-violet-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                      audienceType === 'all' ? 'border-violet-500' : 'border-gray-300'
+                    }`}>
+                      {audienceType === 'all' && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                    </div>
+                    <div>
+                      <span className={`font-medium ${audienceType === 'all' ? 'text-violet-900' : 'text-gray-900'}`}>
+                        Open to All
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">Any user can participate</p>
+                    </div>
+                  </button>
+
+                  {/* Restricted Option */}
+                  <button
+                    onClick={() => setAudienceType('segment')}
+                    className={`relative flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                      audienceType === 'segment'
+                        ? 'border-violet-500 bg-violet-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                      audienceType === 'segment' ? 'border-violet-500' : 'border-gray-300'
+                    }`}>
+                      {audienceType === 'segment' && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                    </div>
+                    <div>
+                      <span className={`font-medium ${audienceType === 'segment' ? 'text-violet-900' : 'text-gray-900'}`}>
+                        Restrict to Segment
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">Only specific wallets can participate</p>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Segment Selection - Only when restricted */}
+                {audienceType === 'segment' && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Select Segment</label>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
+                        className={`w-full px-4 py-3 border rounded-xl text-sm text-left flex items-center justify-between transition-colors ${
+                          selectedAudience
+                            ? 'bg-violet-50 border-violet-200'
+                            : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {selectedAudienceData ? (
+                          <span className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-violet-500" />
+                            <span className="font-medium text-gray-900">{selectedAudienceData.name}</span>
+                            <span className="text-xs text-gray-500">({formatNumber(selectedAudienceData.userCount)} wallets)</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">Select a segment...</span>
+                        )}
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showAudienceDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showAudienceDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setShowAudienceDropdown(false)} />
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1 max-h-64 overflow-y-auto">
+                            {audienceQueries.map(audience => (
+                              <button
+                                key={audience.id}
+                                onClick={() => {
+                                  setSelectedAudience(audience.id);
+                                  setShowAudienceDropdown(false);
+                                }}
+                                className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                                  selectedAudience === audience.id ? 'bg-violet-50' : ''
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Layers className="w-4 h-4 text-violet-500" />
+                                  <span className={`font-medium ${selectedAudience === audience.id ? 'text-violet-700' : 'text-gray-900'}`}>
+                                    {audience.name}
+                                  </span>
+                                </div>
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                  audience.userCount === 0 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {formatNumber(audience.userCount)} wallets
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Segment Info */}
+                    {selectedAudienceData && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Eligible wallets</span>
+                          <span className="font-medium text-violet-600">{formatNumber(selectedAudienceData.userCount)}</span>
+                        </div>
+                        {selectedAudienceData.userCount === 0 && (
+                          <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            This segment has no wallets yet
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Snapshot Mode */}
+                    {selectedAudienceData && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Snapshot Mode</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setEligibilityMode('pinned')}
+                            className={`p-3 rounded-lg border text-left text-sm ${
+                              eligibilityMode === 'pinned'
+                                ? 'border-violet-500 bg-violet-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <span className={`font-medium ${eligibilityMode === 'pinned' ? 'text-violet-700' : 'text-gray-700'}`}>Pinned</span>
+                            <p className="text-xs text-gray-500 mt-0.5">Snapshot at launch</p>
+                          </button>
+                          <button
+                            onClick={() => setEligibilityMode('recurring')}
+                            className={`p-3 rounded-lg border text-left text-sm ${
+                              eligibilityMode === 'recurring'
+                                ? 'border-violet-500 bg-violet-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <span className={`font-medium ${eligibilityMode === 'recurring' ? 'text-violet-700' : 'text-gray-700'}`}>Recurring</span>
+                            <p className="text-xs text-gray-500 mt-0.5">Updates each period</p>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Review */}
+        {configStep === 2 && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Review & Launch</h2>
+              <p className="text-sm text-gray-500">Confirm your incentive configuration</p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Recipe Info */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
+                    <RecipeIcon type={selectedRecipe?.icon} className="w-6 h-6 text-violet-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{incentiveName}</h3>
+                    <p className="text-sm text-gray-500">{selectedRecipe?.description}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                  <div>
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Recipe</span>
+                    <p className="text-sm font-medium text-gray-900">{selectedRecipe?.name}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Reward Type</span>
+                    <p className="text-sm font-medium text-gray-900">{selectedRecipe?.reward}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Configuration Summary */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="font-medium text-gray-900 mb-4">Configuration</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Launch Type</span>
+                    <span className="text-sm font-medium text-gray-900 capitalize">{launchType}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Duration</span>
+                    <span className="text-sm font-medium text-gray-900">{duration} days</span>
+                  </div>
+                  {launchType === 'recurring' && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Frequency</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{frequency}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Eligibility Summary */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="font-medium text-gray-900 mb-4">Eligibility</h3>
+                {selectedAudienceData ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Restricted to</span>
+                      <span className="text-sm font-medium text-gray-900">{selectedAudienceData.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Eligible Wallets</span>
+                      <span className="text-sm font-medium text-violet-600">{formatNumber(selectedAudienceData.userCount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Snapshot Mode</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{eligibilityMode}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Users className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Open to All</p>
+                      <p className="text-xs text-gray-500">Any user can participate - no restrictions</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 sticky bottom-0">
+        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+          <span className="text-xs text-gray-400">* Required Fields</span>
+          <button
+            onClick={handleContinue}
+            disabled={!canContinue()}
+            className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            {configStep === 2 ? 'Launch Incentive' : 'Continue'}
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 };
@@ -3043,6 +4868,7 @@ export default function TorqueApp() {
   // New modal states
   const [showAllUsersModal, setShowAllUsersModal] = useState(false);
   const [showCampaignApproval, setShowCampaignApproval] = useState(false);
+  const [showIncentiveModal, setShowIncentiveModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
@@ -3074,6 +4900,7 @@ export default function TorqueApp() {
     setShowExportModal(false);
     setShowShareModal(false);
     setShowInvestigateModal(false);
+    setShowIncentiveModal(false);
     setSelectedOpportunity(null);
   };
 
@@ -3744,7 +5571,10 @@ export default function TorqueApp() {
         </div>
 
         <div className="px-4 py-3 border-b border-gray-100">
-          <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-sm font-semibold text-white transition-colors">
+          <button
+            onClick={() => setShowIncentiveModal(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-sm font-semibold text-white transition-colors"
+          >
             <Gift className="w-4 h-4" />
             New Incentive
           </button>
@@ -4257,6 +6087,32 @@ export default function TorqueApp() {
           </>
         )}
       </main>
+
+      {/* Global Modals */}
+      {showIncentiveModal && (
+        <CreateIncentiveModal
+          onClose={() => setShowIncentiveModal(false)}
+          onCreate={(incentive) => {
+            console.log('Created incentive:', incentive);
+            setShowIncentiveModal(false);
+            // Show confirmation in chat
+            setMessages(prev => [...prev, {
+              role: 'assistant',
+              content: `Created "${incentive.name}" incentive targeting ${incentive.segment.icon} ${incentive.segment.name} (${incentive.segment.userCount.toLocaleString()} eligible users). The incentive is set to ${incentive.snapshotMode} mode and will run for ${incentive.duration} days.`,
+              data: {
+                type: 'incentive_created',
+                title: incentive.name,
+                urgency: 'Created',
+                stats: [
+                  { value: incentive.segment.userCount.toLocaleString(), label: 'Eligible Users', color: 'text-violet-600' },
+                  { value: incentive.rewardAmount, label: 'Reward' },
+                  { value: `${incentive.duration}d`, label: 'Duration' }
+                ]
+              }
+            }]);
+          }}
+        />
+      )}
     </div>
   );
 }
